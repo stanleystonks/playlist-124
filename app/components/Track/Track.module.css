@@ -1,0 +1,31 @@
+.track {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 35px;
+}
+
+.trackAction {
+    flex-shrink: 0;
+
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+
+    text-align: center;
+    font-weight: bold;
+    background: var(--default-white);
+    opacity: 1;
+
+    transition: opacity 250ms ease-in;
+}
+
+.trackAction:hover {
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.trackDetails {
+    opacity: 0.6;
+}

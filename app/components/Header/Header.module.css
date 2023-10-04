@@ -1,0 +1,43 @@
+/* Header */
+.header {
+    grid-area: header;
+  
+    display: grid;
+    grid-template-areas:
+      "hero"
+      "searchbar";
+    grid-template-rows: 2fr 1fr;
+  
+    padding: 2vw 0;
+  
+    background-image: url('../../styles/images/main-background.jpeg');
+    background-repeat: none;
+    background-size: cover;
+}
+
+.hero {
+    grid-area: hero;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.heading {
+    margin-bottom: 1vw;
+
+    font-size: var(--large-font);
+}
+
+.searchBar {
+    grid-area: searchbar;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: var(--default-white);
+    color: var(--default-black);
+}

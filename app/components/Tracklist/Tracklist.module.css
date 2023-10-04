@@ -1,0 +1,19 @@
+.tracklist {
+    margin-top: 5vw;
+    list-style: none;
+
+    max-height: 50vh;
+    overflow-y: scroll;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 3vw;
+}
+
+@media only screen and (max-width: 600px) {
+    .tracklist {
+        margin-top: 10vw;
+        gap: 5vw;
+    }    
+}

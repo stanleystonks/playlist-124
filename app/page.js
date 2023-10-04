@@ -1,95 +1,114 @@
-import Image from 'next/image'
+"use client"
+
+import { useEffect, useReducer, useRef } from 'react';
+
+import { reducer, ACTIONS, STATE } from './reducer';
+import { Spotify } from './util/Spotify';
+
+import Header from './components/Header/Header';
+import Playlist from './components/Playlist/Playlist';
+import SearchResults from './components/SearchResults/SearchResults';
+
 import styles from './page.module.css'
 
 export default function Home() {
+  const [state, dispatch] = useReducer(reducer, STATE);
+  const hasSearchedRef = useRef(false);
+  const trackCount = useRef(0);
+
+  useEffect(() => {
+    Spotify.getAccessToken();
+  }, []);
+
+  // SearchBar functionality
+  function searchDatabase(term) {
+    if (term === '') {
+      alert('Please, enter a valid search term');
+      return;
+    }
+
+    Spotify.search(term).then(result => {
+      dispatch({ type: ACTIONS.SET_RESULTS, payload: result });
+    });
+
+    if (!hasSearchedRef.current) {
+      dispatch({ type: ACTIONS.SET_HAS_SEARCHED });
+      hasSearchedRef.current = true;
+    }
+  }
+
+  // SearchResults functionality
+  function addTrack(track) {
+    if (state.playlistTracks.some(playlistTrack => playlistTrack.id === track.id)) {
+      alert('Track already exists in playlist.');
+      return;
+    } else {
+      dispatch({
+        type: ACTIONS.SET_PLAYLIST_TRACKS,
+        payload: (prevTracks) => [...prevTracks, track]
+      })
+    }
+  }
+
+  function removeTrack(track) {
+    const reducedTracks = state.playlistTracks.filter(playlistTrack => playlistTrack.id !== track.id);
+    dispatch({
+      type: ACTIONS.SET_PLAYLIST_TRACKS,
+      payload: reducedTracks
+    })
+  }
+
+  // Playlist functionality
+  function updatePlaylistName(name) {
+    dispatch({ type: ACTIONS.SET_PLAYLIST_NAME, payload: name });
+  }
+
+  function savePlaylist() {
+    if (!trackCount.current) {
+      alert('Playlist is empty, please add tracks.');
+      return;
+    } else {
+      const trackURIs = state.playlistTracks.map(track => track.uri);
+      Spotify.savePlaylistName(state.playlistName, trackURIs).then(() => {
+        dispatch({ type: ACTIONS.SET_PLAYLIST_NAME, payload: 'New Playlist #' });
+        dispatch({ type: ACTIONS.SET_PLAYLIST_TRACKS, payload: [] });
+      });
+    }
+  }
+
+  // Determine if playlist is empty
+  function trackCounter(arg) {
+    if (arg) {
+      trackCount.current++;
+    } else {
+      trackCount.current--;
+    }
+  }
+
+  // Return JSX
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    <>
+      <Header
+        onSearch={searchDatabase}
+      />
+      {state.hasSearched && (
+        <main className={styles.main}>
+          <SearchResults
+            results={state.results}
+            onAdd={addTrack}
+            trackCounter={trackCounter}
+          />
+          <Playlist
+            playlistName={state.playlistName}
+            playlistTracks={state.playlistTracks}
+            onRemove={removeTrack}
+            onNameChange={updatePlaylistName}
+            onSave={savePlaylist}
+            trackCount={trackCount.current}
+            trackCounter={trackCounter}
+          />
+        </main>
+      )}
+    </>
   )
 }
