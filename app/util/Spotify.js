@@ -1,6 +1,6 @@
 let accessToken = '';
 const clientID = '7ca8f235ef0241fe8c802d28dbb91252';
-const redirectURI = 'playlist-124.vercel.app';
+const redirectURI = 'https://playlist-124.vercel.app';
 
 const Spotify = {
   async getAccessToken() {
