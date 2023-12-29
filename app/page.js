@@ -16,9 +16,9 @@ export default function Home() {
   const hasSearchedRef = useRef(false);
   const trackCount = useRef(0);
 
-  useEffect(() => {
-    Spotify.getAccessToken();
-  }, []);
+  // useEffect(() => {
+  //   Spotify.getAccessToken();
+  // }, []);
 
   // SearchBar functionality
   function searchDatabase(term) {
